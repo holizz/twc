@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import json
+import re
 import sys
 import urllib2
 
@@ -14,10 +15,18 @@ def get(f, u):
 def to_screen_name(u):
     return json.load(urllib2.urlopen(show%u))['screen_name']
 
+if len(sys.argv) == 1:
+    print """Examples:
+twc followers@holizz \& friends@holizz
+twc 'followers@holizz | followers@harrym | followers@dextrousweb'"""
+else:
+    args = " ".join(sys.argv[1:])
 
-users = get(friends,'holizz') & get(followers,'holizz')
+    args = re.sub('(\w+)@(\w+)', 'get(\\1,"\\2")', args)
 
-sys.stderr.write("Total: %s\n" % len(users))
+    exec("users = "+args)
 
-for u in users:
-    print to_screen_name(u)
+    sys.stderr.write("Total: %s\n" % len(users))
+
+    for u in users:
+        print to_screen_name(u)
